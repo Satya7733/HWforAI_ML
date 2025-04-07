@@ -1,0 +1,47 @@
+Bytecode Analysis Report
+------------------------
+
+Total Instructions: 153
+
+Individual Instruction Counts (Decreasing Order):
+LOAD_CONST: 14 instructions (9.15%)
+CALL: 14 instructions (9.15%)
+LOAD_FAST: 13 instructions (8.50%)
+STORE_FAST: 11 instructions (7.19%)
+POP_TOP: 10 instructions (6.54%)
+LOAD_GLOBAL: 10 instructions (6.54%)
+GET_ITER: 8 instructions (5.23%)
+BINARY_SUBSCR: 8 instructions (5.23%)
+SWAP: 8 instructions (5.23%)
+BUILD_LIST: 7 instructions (4.58%)
+LOAD_NAME: 7 instructions (4.58%)
+JUMP_BACKWARD: 6 instructions (3.92%)
+STORE_NAME: 5 instructions (3.27%)
+PUSH_NULL: 3 instructions (1.96%)
+LOAD_FAST_LOAD_FAST: 3 instructions (1.96%)
+RESUME: 2 instructions (1.31%)
+LIST_EXTEND: 2 instructions (1.31%)
+LOAD_FAST_AND_CLEAR: 2 instructions (1.31%)
+LIST_APPEND: 2 instructions (1.31%)
+COPY: 2 instructions (1.31%)
+BINARY_OP: 2 instructions (1.31%)
+RERAISE: 2 instructions (1.31%)
+MAKE_FUNCTION: 1 instructions (0.65%)
+L2: 1 instructions (0.65%)
+RETURN_CONST: 1 instructions (0.65%)
+COMPARE_OP: 1 instructions (0.65%)
+POP_JUMP_IF_FALSE: 1 instructions (0.65%)
+RAISE_VARARGS: 1 instructions (0.65%)
+L1: 1 instructions (0.65%)
+STORE_SUBSCR: 1 instructions (0.65%)
+L13: 1 instructions (0.65%)
+L14: 1 instructions (0.65%)
+L15: 1 instructions (0.65%)
+RETURN_VALUE: 1 instructions (0.65%)
+
+Consolidated Categories:
+Arithmetic: 10 instructions (6.54%)
+Load: 49 instructions (32.03%)
+Store: 17 instructions (11.11%)
+Return: 2 instructions (1.31%)
+Other: 75 instructions (49.02%)

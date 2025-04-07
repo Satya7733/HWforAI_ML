@@ -1,0 +1,204 @@
+  0           RESUME                   0
+
+  1           LOAD_CONST               0 (<code object matrix_multiply_manual at 0x000002000C875A30, file "MatrixMul.py", line 1>)
+              MAKE_FUNCTION
+              STORE_NAME               0 (matrix_multiply_manual)
+
+ 31           BUILD_LIST               0
+              LOAD_CONST               1 ((1, 2, 3))
+              LIST_EXTEND              1
+
+ 32           BUILD_LIST               0
+              LOAD_CONST               2 ((4, 5, 6))
+              LIST_EXTEND              1
+
+ 30           BUILD_LIST               2
+              STORE_NAME               1 (A)
+
+ 36           LOAD_CONST               3 (7)
+              LOAD_CONST               4 (8)
+              BUILD_LIST               2
+
+ 37           LOAD_CONST               5 (9)
+              LOAD_CONST               6 (10)
+              BUILD_LIST               2
+
+ 38           LOAD_CONST               7 (11)
+              LOAD_CONST               8 (12)
+              BUILD_LIST               2
+
+ 35           BUILD_LIST               3
+              STORE_NAME               2 (B)
+
+ 41           LOAD_NAME                0 (matrix_multiply_manual)
+              PUSH_NULL
+              LOAD_NAME                1 (A)
+              LOAD_NAME                2 (B)
+              CALL                     2
+              STORE_NAME               3 (result)
+
+ 42           LOAD_NAME                4 (print)
+              PUSH_NULL
+              LOAD_CONST               9 ('Matrix multiplication result:')
+              CALL                     1
+              POP_TOP
+
+ 43           LOAD_NAME                3 (result)
+              GET_ITER
+      L1:     FOR_ITER                11 (to L2)
+              STORE_NAME               5 (row)
+
+ 44           LOAD_NAME                4 (print)
+              PUSH_NULL
+              LOAD_NAME                5 (row)
+              CALL                     1
+              POP_TOP
+              JUMP_BACKWARD           13 (to L1)
+
+ 43   L2:     END_FOR
+              POP_TOP
+              RETURN_CONST            10 (None)
+
+Disassembly of <code object matrix_multiply_manual at 0x000002000C875A30, file "MatrixMul.py", line 1>:
+   1            RESUME                   0
+
+  13            LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST                0 (A)
+                LOAD_CONST               1 (0)
+                BINARY_SUBSCR
+                CALL                     1
+                LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST                1 (B)
+                CALL                     1
+                COMPARE_OP             119 (bool(!=))
+                POP_JUMP_IF_FALSE       11 (to L1)
+
+  14            LOAD_GLOBAL              3 (ValueError + NULL)
+                LOAD_CONST               2 ("Matrix dimensions don't match for multiplication. A columns must equal B rows.")
+                CALL                     1
+                RAISE_VARARGS            1
+
+  17    L1:     LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST                0 (A)
+                CALL                     1
+                STORE_FAST               2 (rows_A)
+
+  18            LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST                1 (B)
+                LOAD_CONST               1 (0)
+                BINARY_SUBSCR
+                CALL                     1
+                STORE_FAST               3 (cols_B)
+
+  19            LOAD_GLOBAL              5 (range + NULL)
+                LOAD_FAST                2 (rows_A)
+                CALL                     1
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      4 (_)
+                SWAP                     2
+        L2:     BUILD_LIST               0
+                SWAP                     2
+                GET_ITER
+        L3:     FOR_ITER                31 (to L8)
+                STORE_FAST               4 (_)
+                LOAD_GLOBAL              5 (range + NULL)
+                LOAD_FAST                3 (cols_B)
+                CALL                     1
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      4 (_)
+                SWAP                     2
+        L4:     BUILD_LIST               0
+                SWAP                     2
+                GET_ITER
+        L5:     FOR_ITER                 5 (to L6)
+                STORE_FAST               4 (_)
+                LOAD_CONST               1 (0)
+                LIST_APPEND              2
+                JUMP_BACKWARD            7 (to L5)
+        L6:     END_FOR
+                POP_TOP
+        L7:     SWAP                     2
+                STORE_FAST               4 (_)
+                LIST_APPEND              2
+                JUMP_BACKWARD           33 (to L3)
+        L8:     END_FOR
+                POP_TOP
+        L9:     STORE_FAST               5 (result)
+                STORE_FAST               4 (_)
+
+  22            LOAD_GLOBAL              5 (range + NULL)
+                LOAD_FAST                2 (rows_A)
+                CALL                     1
+                GET_ITER
+       L10:     FOR_ITER                76 (to L15)
+                STORE_FAST               6 (i)
+
+  23            LOAD_GLOBAL              5 (range + NULL)
+                LOAD_FAST                3 (cols_B)
+                CALL                     1
+                GET_ITER
+       L11:     FOR_ITER                58 (to L14)
+                STORE_FAST               7 (j)
+
+  24            LOAD_GLOBAL              5 (range + NULL)
+                LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST                1 (B)
+                CALL                     1
+                CALL                     1
+                GET_ITER
+       L12:     FOR_ITER                31 (to L13)
+                STORE_FAST               8 (k)
+
+  25            LOAD_FAST_LOAD_FAST     86 (result, i)
+                BINARY_SUBSCR
+                LOAD_FAST                7 (j)
+                COPY                     2
+                COPY                     2
+                BINARY_SUBSCR
+                LOAD_FAST_LOAD_FAST      6 (A, i)
+                BINARY_SUBSCR
+                LOAD_FAST                8 (k)
+                BINARY_SUBSCR
+                LOAD_FAST_LOAD_FAST     24 (B, k)
+                BINARY_SUBSCR
+                LOAD_FAST                7 (j)
+                BINARY_SUBSCR
+                BINARY_OP                5 (*)
+                BINARY_OP               13 (+=)
+                SWAP                     3
+                SWAP                     2
+                STORE_SUBSCR
+                JUMP_BACKWARD           33 (to L12)
+
+  24   L13:     END_FOR
+                POP_TOP
+                JUMP_BACKWARD           60 (to L11)
+
+  23   L14:     END_FOR
+                POP_TOP
+                JUMP_BACKWARD           78 (to L10)
+
+  22   L15:     END_FOR
+                POP_TOP
+
+  27            LOAD_FAST                5 (result)
+                RETURN_VALUE
+
+  --   L16:     SWAP                     2
+                POP_TOP
+
+  19            SWAP                     2
+                STORE_FAST               4 (_)
+                RERAISE                  0
+
+  --   L17:     SWAP                     2
+                POP_TOP
+
+  19            SWAP                     2
+                STORE_FAST               4 (_)
+                RERAISE                  0
+ExceptionTable:
+  L2 to L4 -> L17 [2]
+  L4 to L7 -> L16 [5]
+  L7 to L9 -> L17 [2]
+  L16 to L17 -> L17 [2]

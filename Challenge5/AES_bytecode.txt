@@ -1,0 +1,235 @@
+  0           RESUME                   0
+
+  3           LOAD_CONST               0 (0)
+              LOAD_CONST               1 (None)
+              IMPORT_NAME              0 (base64)
+              STORE_NAME               0 (base64)
+
+  4           LOAD_CONST               0 (0)
+              LOAD_CONST               2 (('AES',))
+              IMPORT_NAME              1 (Crypto.Cipher)
+              IMPORT_FROM              2 (AES)
+              STORE_NAME               2 (AES)
+              POP_TOP
+
+  5           LOAD_CONST               0 (0)
+              LOAD_CONST               3 (('Random',))
+              IMPORT_NAME              3 (Crypto)
+              IMPORT_FROM              4 (Random)
+              STORE_NAME               4 (Random)
+              POP_TOP
+
+  6           LOAD_CONST               0 (0)
+              LOAD_CONST               4 (('PBKDF2',))
+              IMPORT_NAME              5 (Crypto.Protocol.KDF)
+              IMPORT_FROM              6 (PBKDF2)
+              STORE_NAME               6 (PBKDF2)
+              POP_TOP
+
+  8           LOAD_CONST               5 (16)
+              STORE_NAME               7 (BLOCK_SIZE)
+
+  9           LOAD_CONST               6 (<code object <lambda> at 0x000002148CD97360, file "AES.py", line 9>)
+              MAKE_FUNCTION
+              STORE_NAME               8 (pad)
+
+ 10           LOAD_CONST               7 (<code object <lambda> at 0x000002148D0BDDF0, file "AES.py", line 10>)
+              MAKE_FUNCTION
+              STORE_NAME               9 (unpad)
+
+ 12           LOAD_NAME               10 (input)
+              PUSH_NULL
+              LOAD_CONST               8 ('Enter encryption password: ')
+              CALL                     1
+              STORE_NAME              11 (password)
+
+ 15           LOAD_CONST               9 (<code object get_private_key at 0x000002148D0A2F30, file "AES.py", line 15>)
+              MAKE_FUNCTION
+              STORE_NAME              12 (get_private_key)
+
+ 22           LOAD_CONST              10 (<code object encrypt at 0x000002148CD8B430, file "AES.py", line 22>)
+              MAKE_FUNCTION
+              STORE_NAME              13 (encrypt)
+
+ 30           LOAD_CONST              11 (<code object decrypt at 0x000002148CD9DBD0, file "AES.py", line 30>)
+              MAKE_FUNCTION
+              STORE_NAME              14 (decrypt)
+
+ 39           LOAD_NAME               13 (encrypt)
+              PUSH_NULL
+              LOAD_CONST              12 ('This is a secret message')
+              LOAD_NAME               11 (password)
+              CALL                     2
+              STORE_NAME              15 (encrypted)
+
+ 40           LOAD_NAME               16 (print)
+              PUSH_NULL
+              LOAD_NAME               15 (encrypted)
+              CALL                     1
+              POP_TOP
+
+ 43           LOAD_NAME               14 (decrypt)
+              PUSH_NULL
+              LOAD_NAME               15 (encrypted)
+              LOAD_NAME               11 (password)
+              CALL                     2
+              STORE_NAME              17 (decrypted)
+
+ 44           LOAD_NAME               16 (print)
+              PUSH_NULL
+              LOAD_NAME               18 (bytes)
+              LOAD_ATTR               39 (decode + NULL|self)
+              LOAD_NAME               17 (decrypted)
+              CALL                     1
+              CALL                     1
+              POP_TOP
+              RETURN_CONST             1 (None)
+
+Disassembly of <code object <lambda> at 0x000002148CD97360, file "AES.py", line 9>:
+  9           RESUME                   0
+              LOAD_FAST                0 (s)
+              LOAD_GLOBAL              0 (BLOCK_SIZE)
+              LOAD_GLOBAL              3 (len + NULL)
+              LOAD_FAST                0 (s)
+              CALL                     1
+              LOAD_GLOBAL              0 (BLOCK_SIZE)
+              BINARY_OP                6 (%)
+              BINARY_OP               10 (-)
+              LOAD_GLOBAL              5 (chr + NULL)
+              LOAD_GLOBAL              0 (BLOCK_SIZE)
+              LOAD_GLOBAL              3 (len + NULL)
+              LOAD_FAST                0 (s)
+              CALL                     1
+              LOAD_GLOBAL              0 (BLOCK_SIZE)
+              BINARY_OP                6 (%)
+              BINARY_OP               10 (-)
+              CALL                     1
+              BINARY_OP                5 (*)
+              BINARY_OP                0 (+)
+              RETURN_VALUE
+
+Disassembly of <code object <lambda> at 0x000002148D0BDDF0, file "AES.py", line 10>:
+ 10           RESUME                   0
+              LOAD_FAST                0 (s)
+              LOAD_CONST               0 (None)
+              LOAD_GLOBAL              1 (ord + NULL)
+              LOAD_FAST                0 (s)
+              LOAD_GLOBAL              3 (len + NULL)
+              LOAD_FAST                0 (s)
+              CALL                     1
+              LOAD_CONST               1 (1)
+              BINARY_OP               10 (-)
+              LOAD_CONST               0 (None)
+              BINARY_SLICE
+              CALL                     1
+              UNARY_NEGATIVE
+              BINARY_SLICE
+              RETURN_VALUE
+
+Disassembly of <code object get_private_key at 0x000002148D0A2F30, file "AES.py", line 15>:
+ 15           RESUME                   0
+
+ 16           LOAD_CONST               1 (b'this is a salt')
+              STORE_FAST               1 (salt)
+
+ 17           LOAD_GLOBAL              1 (PBKDF2 + NULL)
+              LOAD_FAST_LOAD_FAST      1 (password, salt)
+              LOAD_CONST               2 (64)
+              LOAD_CONST               3 (1000)
+              CALL                     4
+              STORE_FAST               2 (kdf)
+
+ 18           LOAD_FAST                2 (kdf)
+              LOAD_CONST               0 (None)
+              LOAD_CONST               4 (32)
+              BINARY_SLICE
+              STORE_FAST               3 (key)
+
+ 19           LOAD_FAST                3 (key)
+              RETURN_VALUE
+
+Disassembly of <code object encrypt at 0x000002148CD8B430, file "AES.py", line 22>:
+ 22           RESUME                   0
+
+ 23           LOAD_GLOBAL              1 (get_private_key + NULL)
+              LOAD_FAST                1 (password)
+              CALL                     1
+              STORE_FAST               2 (private_key)
+
+ 24           LOAD_GLOBAL              3 (pad + NULL)
+              LOAD_FAST                0 (raw)
+              CALL                     1
+              STORE_FAST               0 (raw)
+
+ 25           LOAD_GLOBAL              4 (Random)
+              LOAD_ATTR                6 (new)
+              PUSH_NULL
+              CALL                     0
+              LOAD_ATTR                9 (read + NULL|self)
+              LOAD_GLOBAL             10 (AES)
+              LOAD_ATTR               12 (block_size)
+              CALL                     1
+              STORE_FAST               3 (iv)
+
+ 26           LOAD_GLOBAL             10 (AES)
+              LOAD_ATTR                6 (new)
+              PUSH_NULL
+              LOAD_FAST                2 (private_key)
+              LOAD_GLOBAL             10 (AES)
+              LOAD_ATTR               14 (MODE_CBC)
+              LOAD_FAST                3 (iv)
+              CALL                     3
+              STORE_FAST               4 (cipher)
+
+ 27           LOAD_GLOBAL             16 (base64)
+              LOAD_ATTR               18 (b64encode)
+              PUSH_NULL
+              LOAD_FAST_LOAD_FAST     52 (iv, cipher)
+              LOAD_ATTR               21 (encrypt + NULL|self)
+              LOAD_FAST                0 (raw)
+              CALL                     1
+              BINARY_OP                0 (+)
+              CALL                     1
+              RETURN_VALUE
+
+Disassembly of <code object decrypt at 0x000002148CD9DBD0, file "AES.py", line 30>:
+ 30           RESUME                   0
+
+ 31           LOAD_GLOBAL              1 (get_private_key + NULL)
+              LOAD_FAST                1 (password)
+              CALL                     1
+              STORE_FAST               2 (private_key)
+
+ 32           LOAD_GLOBAL              2 (base64)
+              LOAD_ATTR                4 (b64decode)
+              PUSH_NULL
+              LOAD_FAST                0 (enc)
+              CALL                     1
+              STORE_FAST               0 (enc)
+
+ 33           LOAD_FAST                0 (enc)
+              LOAD_CONST               0 (None)
+              LOAD_CONST               1 (16)
+              BINARY_SLICE
+              STORE_FAST               3 (iv)
+
+ 34           LOAD_GLOBAL              6 (AES)
+              LOAD_ATTR                8 (new)
+              PUSH_NULL
+              LOAD_FAST                2 (private_key)
+              LOAD_GLOBAL              6 (AES)
+              LOAD_ATTR               10 (MODE_CBC)
+              LOAD_FAST                3 (iv)
+              CALL                     3
+              STORE_FAST               4 (cipher)
+
+ 35           LOAD_GLOBAL             13 (unpad + NULL)
+              LOAD_FAST                4 (cipher)
+              LOAD_ATTR               15 (decrypt + NULL|self)
+              LOAD_FAST                0 (enc)
+              LOAD_CONST               1 (16)
+              LOAD_CONST               0 (None)
+              BINARY_SLICE
+              CALL                     1
+              CALL                     1
+              RETURN_VALUE

@@ -1,0 +1,148 @@
+  0           RESUME                   0
+
+  1           LOAD_CONST               0 (<code object quicksort at 0x000001F9E1E1B030, file "QuickSort.py", line 1>)
+              MAKE_FUNCTION
+              STORE_NAME               0 (quicksort)
+
+ 13           BUILD_LIST               0
+              LOAD_CONST               1 ((10, 3, 8, 15, 6, 12, 2, 18, 7))
+              LIST_EXTEND              1
+              STORE_NAME               1 (arr)
+
+ 14           LOAD_NAME                0 (quicksort)
+              PUSH_NULL
+              LOAD_NAME                1 (arr)
+              CALL                     1
+              STORE_NAME               2 (sorted_arr)
+
+ 15           LOAD_NAME                3 (print)
+              PUSH_NULL
+              LOAD_CONST               2 ('Sorted Array:')
+              LOAD_NAME                2 (sorted_arr)
+              CALL                     2
+              POP_TOP
+              RETURN_CONST             3 (None)
+
+Disassembly of <code object quicksort at 0x000001F9E1E1B030, file "QuickSort.py", line 1>:
+   1            RESUME                   0
+
+   2            LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST                0 (arr)
+                CALL                     1
+                LOAD_CONST               1 (1)
+                COMPARE_OP              58 (bool(<=))
+                POP_JUMP_IF_FALSE        2 (to L1)
+
+   3            LOAD_FAST                0 (arr)
+                RETURN_VALUE
+
+   5    L1:     LOAD_FAST                0 (arr)
+                LOAD_GLOBAL              1 (len + NULL)
+                LOAD_FAST                0 (arr)
+                CALL                     1
+                LOAD_CONST               2 (2)
+                BINARY_OP                2 (//)
+                BINARY_SUBSCR
+                STORE_FAST               1 (pivot)
+
+   6            LOAD_FAST                0 (arr)
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      2 (x)
+                SWAP                     2
+        L2:     BUILD_LIST               0
+                SWAP                     2
+                GET_ITER
+        L3:     FOR_ITER                12 (to L6)
+                STORE_FAST_LOAD_FAST    34 (x, x)
+                LOAD_FAST                1 (pivot)
+                COMPARE_OP              18 (bool(<))
+        L4:     POP_JUMP_IF_TRUE         2 (to L5)
+                JUMP_BACKWARD           10 (to L3)
+        L5:     LOAD_FAST                2 (x)
+                LIST_APPEND              2
+                JUMP_BACKWARD           14 (to L3)
+        L6:     END_FOR
+                POP_TOP
+        L7:     STORE_FAST               3 (left)
+                STORE_FAST               2 (x)
+
+   7            LOAD_FAST                0 (arr)
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      2 (x)
+                SWAP                     2
+        L8:     BUILD_LIST               0
+                SWAP                     2
+                GET_ITER
+        L9:     FOR_ITER                12 (to L12)
+                STORE_FAST_LOAD_FAST    34 (x, x)
+                LOAD_FAST                1 (pivot)
+                COMPARE_OP              88 (bool(==))
+       L10:     POP_JUMP_IF_TRUE         2 (to L11)
+                JUMP_BACKWARD           10 (to L9)
+       L11:     LOAD_FAST                2 (x)
+                LIST_APPEND              2
+                JUMP_BACKWARD           14 (to L9)
+       L12:     END_FOR
+                POP_TOP
+       L13:     STORE_FAST               4 (middle)
+                STORE_FAST               2 (x)
+
+   8            LOAD_FAST                0 (arr)
+                GET_ITER
+                LOAD_FAST_AND_CLEAR      2 (x)
+                SWAP                     2
+       L14:     BUILD_LIST               0
+                SWAP                     2
+                GET_ITER
+       L15:     FOR_ITER                12 (to L18)
+                STORE_FAST_LOAD_FAST    34 (x, x)
+                LOAD_FAST                1 (pivot)
+                COMPARE_OP             148 (bool(>))
+       L16:     POP_JUMP_IF_TRUE         2 (to L17)
+                JUMP_BACKWARD           10 (to L15)
+       L17:     LOAD_FAST                2 (x)
+                LIST_APPEND              2
+                JUMP_BACKWARD           14 (to L15)
+       L18:     END_FOR
+                POP_TOP
+       L19:     STORE_FAST               5 (right)
+                STORE_FAST               2 (x)
+
+  10            LOAD_GLOBAL              3 (quicksort + NULL)
+                LOAD_FAST                3 (left)
+                CALL                     1
+                LOAD_FAST                4 (middle)
+                BINARY_OP                0 (+)
+                LOAD_GLOBAL              3 (quicksort + NULL)
+                LOAD_FAST                5 (right)
+                CALL                     1
+                BINARY_OP                0 (+)
+                RETURN_VALUE
+
+  --   L20:     SWAP                     2
+                POP_TOP
+
+   6            SWAP                     2
+                STORE_FAST               2 (x)
+                RERAISE                  0
+
+  --   L21:     SWAP                     2
+                POP_TOP
+
+   7            SWAP                     2
+                STORE_FAST               2 (x)
+                RERAISE                  0
+
+  --   L22:     SWAP                     2
+                POP_TOP
+
+   8            SWAP                     2
+                STORE_FAST               2 (x)
+                RERAISE                  0
+ExceptionTable:
+  L2 to L4 -> L20 [2]
+  L5 to L7 -> L20 [2]
+  L8 to L10 -> L21 [2]
+  L11 to L13 -> L21 [2]
+  L14 to L16 -> L22 [2]
+  L17 to L19 -> L22 [2]
