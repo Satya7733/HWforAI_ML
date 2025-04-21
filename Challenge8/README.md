@@ -134,11 +134,5 @@ Pull requests and issues are welcome!
 
 ---
 
-## 📄 License
-
-This project is released under the [MIT License](LICENSE).
-
----
-
 *Happy learning!*
 
