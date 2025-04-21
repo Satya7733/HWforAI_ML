@@ -44,7 +44,7 @@ pip install numpy matplotlib pillow
 
 ```
 .
-├── xor_mlp_backprop.py     # Main script
+├── XOR_Multilayer.py     # Main script
 ├── xor_training.gif        # Generated animation output
 ├── README.md               # This file
 
@@ -56,7 +56,7 @@ pip install numpy matplotlib pillow
 
 1. **Run the script**  
    ```bash
-   python xor_mlp_backprop.py
+   python XOR_Multilayer.py
    ```
 2. **What happens**  
    - A static window pops up showing the 2‑2‑1 network layout.  
