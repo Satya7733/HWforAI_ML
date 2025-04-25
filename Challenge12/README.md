@@ -10,9 +10,9 @@ This repository captures the work done to meet the challenge requirements:
      - **Planning updates** (Dyna‑Q inner loop)
      - **Overall runtime** including environment steps and loop overhead.
    - Generated profiling results showing:
-  - Q-update: 7.2021 s (2.00%)
-  - Planning: 136.1239 s (37.88%)
-  - Overhead (env.step, Python loop, logging): 216.0070 s (60.11%)
+  - **Q-update: 7.2021 s (2.00%)**
+  - **Planning: 136.1239 s (37.88%)**
+  - **Overhead (env.step, Python loop, logging): 216.0070 s (60.11%)**
 - Achieved 100% success rate over 200 evaluation episodes.
 
 2. **Hardware Acceleration Decision**
