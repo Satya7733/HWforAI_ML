@@ -53,11 +53,4 @@ Please open and run the Colab notebook at: [Your CUDA SAXPY Benchmark Colab](htt
 - **Overhead-dominant for small N:** For smaller problem sizes, data transfer and launch overheads dominate the overall runtime; compute is negligible.
 - **Compute contribution for large N:** At larger N values, the kernel compute time becomes a more significant fraction of total time, though transfers still contribute notably.
 
-### Image Format
-
-Place your performance plot image in the repository (PNG or JPEG recommended) and reference it using standard Markdown syntax, for example:
-
-```markdown
-![SAXPY Performance vs N](plot.png)
-```
-
+DHANYAWAD!!!
