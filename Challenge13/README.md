@@ -41,7 +41,7 @@ Please open and run the Colab notebook at: [Your CUDA SAXPY Benchmark Colab](htt
 
 ## Performance Plot
 
-![SAXPY Performance vs N](HWforAI_ML/Challenge13/KernelTiming.png)
+![SAXPY Performance vs N](KernelTiming.png)
 
 *Figure: Execution times for total end‑to‑end (blue) and kernel‑only (orange) across N = 2^15…2^25.*
 
