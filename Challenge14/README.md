@@ -52,7 +52,7 @@ Open the Colab notebook linked here: [Your CUDA Fibonacci Benchmark Colab](https
 
 ## Performance Plot
 
-![Fibonacci Performance Comparison]\(\Plot.png)
+![Fibonacci Performance Comparison]\(/Plot.png)
 
 *Figure: Execution time (ms) for CPU sequential, GPU end-to-end, and GPU kernel-only for N = 2^25.*
 
