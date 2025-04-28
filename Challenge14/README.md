@@ -64,9 +64,8 @@ Open the Colab notebook linked here: [Your CUDA Fibonacci Benchmark Colab](https
 - **Timer Isolation:** Kernel-only timings isolate device compute but still suffer from redundant work.
 - **Parallel Suitability:** Achieving GPU speedup for Fibonacci requires an inherently parallel algorithm (e.g., fast-doubling or parallel prefix) rather than independent per-index recomputation.
 
-## Image Format
 
-Include your plot image (PNG or JPEG) in the repo and reference it:
+
 
 **DHANYAWAD**
 
