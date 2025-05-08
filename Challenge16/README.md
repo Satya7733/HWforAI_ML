@@ -16,6 +16,7 @@ Benchmarks are performed on 1,000 iterations with batch size = 128.
 ```
 feedforward.cu         # Custom CUDA forward-pass implementation
 benchmark_ff.py        # PyTorch forward-pass benchmark script
+Graph.py               # Plots Bar Graph
 cuda_times.csv         # Generated custom-CUDA timings
 pytorch_times.csv      # Generated PyTorch (CPU/GPU) timings
 README.md              # This file
