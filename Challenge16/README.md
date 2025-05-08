@@ -89,17 +89,12 @@ README.md              # This file
 
 | Backend       | Time (ms per 1000 iters) |
 | ------------- | -----------------------: |
-| Custom CUDA   |                  15.4811 |
-| PyTorch (CPU) |                  82.5690 |
-| PyTorch (GPU) |                 162.8340 |
+| Custom CUDA   |                  14.216  |
+| PyTorch (CPU) |                  46.353  |
+| PyTorch (GPU) |                  112.911 |
 
 ![Performance Comparison](Plot.png)
 
-| Backend       | Time (ms per 1000 iters) |
-| ------------- | -----------------------: |
-| Custom CUDA   |                  15.4811 |
-| PyTorch (CPU) |                  82.5690 |
-| PyTorch (GPU) |                 162.8340 |
 
 ---
 
