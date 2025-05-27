@@ -1,0 +1,137 @@
+// FSM-based, functionally correct point addition (P ? Q only)
+module point_addition #(parameter n = 256)(
+  input clk,
+  input reset,
+  input [n-1:0] p,
+  input [n-1:0] x1, y1,
+  input [n-1:0] x2, y2,
+  output reg [n-1:0] x3, y3,
+  output reg result,
+  output reg infinity
+);
+
+  // Internal signals
+  reg [n-1:0] y_diff, x_diff, x_diff_inv;
+  reg [n-1:0] lambda, lambda2, x1x2, x1x3_diff;
+  reg [n-1:0] mult_a, mult_b;
+  wire [n-1:0] mult_result;
+  wire mult_done;
+  reg mult_start;
+
+  // Modular inverse module
+  wire inv_done;
+  reg inv_start;
+  wire [n-1:0] inv_result;
+
+  // FSM state encoding
+  parameter IDLE = 3'd0,
+            CALC_INV = 3'd1,
+            WAIT_INV = 3'd2,
+            CALC_LAMBDA = 3'd3,
+            WAIT_LAMBDA = 3'd4,
+            CALC_X3 = 3'd5,
+            CALC_Y3 = 3'd6,
+            DONE = 3'd7;
+
+  reg [2:0] state;
+
+  // Modules
+  modular_multiplier #(n) mul (.clk(clk), .reset(reset), .A(mult_a), .B(mult_b), .M(mult_result), .p(p), .flag(mult_done));
+  multiplicative_inverse #(n) inv (.clk(clk), .reset(reset), .enable(inv_start), .p(p), .A(x_diff), .X(inv_result), .result_ready(inv_done));
+
+  // FSM
+  always @(posedge clk or posedge reset) begin
+    if (reset) begin
+      state <= IDLE;
+      result <= 0;
+      infinity <= 0;
+      mult_start <= 0;
+      inv_start <= 0;
+      x3 <= 0;
+      y3 <= 0;
+    end else begin
+      case (state)
+        IDLE: begin
+          result <= 0;
+          infinity <= 0;
+          if ((x1 == x2) && ((y1 + y2) % p == 0)) begin
+            infinity <= 1;
+            x3 <= 0;
+            y3 <= 0;
+            state <= DONE;
+          end else begin
+            y_diff <= (y2 >= y1) ? y2 - y1 : y2 + p - y1;
+            x_diff <= (x2 >= x1) ? x2 - x1 : x2 + p - x1;
+            inv_start <= 1;
+            $display("[IDLE] y_diff = %h, x_diff = %h", y_diff, x_diff);
+            state <= CALC_INV;
+          end
+        end
+
+        CALC_INV: begin
+          inv_start <= 0;
+          state <= WAIT_INV;
+        end
+
+        WAIT_INV: begin
+          if (inv_done) begin
+            x_diff_inv <= inv_result;
+            mult_a <= y_diff;
+            mult_b <= inv_result;
+            mult_start <= 1;
+            $display("[WAIT_INV] x_diff_inv = %h", x_diff_inv);
+            state <= CALC_LAMBDA;
+          end
+        end
+
+        CALC_LAMBDA: begin
+          mult_start <= 0;
+          if (mult_done) begin
+            lambda <= mult_result;
+            mult_a <= mult_result;
+            mult_b <= mult_result;
+            mult_start <= 1;
+            $display("[CALC_LAMBDA] lambda = %h", lambda);
+            state <= WAIT_LAMBDA;
+          end
+        end
+
+        WAIT_LAMBDA: begin
+          mult_start <= 0;
+          if (mult_done) begin
+            lambda2 <= mult_result;
+            x1x2 <= (x1 + x2) % p;
+            $display("[WAIT_LAMBDA] lambda^2 = %h, x1 + x2 = %h", lambda2, x1x2);
+            state <= CALC_X3;
+          end
+        end
+
+        CALC_X3: begin
+          x3 <= (lambda2 >= x1x2) ? (lambda2 - x1x2) % p : (lambda2 + p - x1x2) % p;
+          $display("[CALC_X3] x3 = %h", x3);
+          state <= CALC_Y3;
+        end
+
+        CALC_Y3: begin
+          x1x3_diff <= (x1 >= x3) ? x1 - x3 : x1 + p - x3;
+          mult_a <= lambda;
+          mult_b <= x1x3_diff;
+          mult_start <= 1;
+          $display("[CALC_Y3] x1 - x3 = %h", x1x3_diff);
+          state <= DONE;
+        end
+
+        DONE: begin
+          mult_start <= 0;
+          if (mult_done) begin
+            y3 <= (mult_result >= y1) ? (mult_result - y1) % p : (mult_result + p - y1) % p;
+            result <= 1;
+            $display("[DONE] y3 = %h", y3);
+            state <= IDLE;
+          end
+        end
+      endcase
+    end
+  end
+endmodule
+
