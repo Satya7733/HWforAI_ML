@@ -1,13 +1,15 @@
 import hashlib
 import secrets
 import time
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # ——— Domain parameters for secp256k1 ———
 p  = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
 a  = 0
 b  = 7
 
-# Base point G (make sure these are exact)
+# Base point G
 Gx = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
 Gy = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
 G  = (Gx, Gy)
@@ -20,13 +22,16 @@ def inv_mod(k, m):
     return pow(k, -1, m)
 
 def is_on_curve(P):
-    if P is None: return True
+    if P is None:
+        return True
     x, y = P
     return (y*y - (x*x*x + a*x + b)) % p == 0
 
 def point_add(P, Q):
-    if P is None: return Q
-    if Q is None: return P
+    if P is None:
+        return Q
+    if Q is None:
+        return P
     x1, y1 = P
     x2, y2 = Q
     if x1 == x2 and (y1 + y2) % p == 0:
@@ -39,62 +44,29 @@ def point_add(P, Q):
     y3 = (lam*(x1 - x3) - y1) % p
     return (x3, y3)
 
-# ——— Original scalar_mult ———
+# ——— Original scalar_mult (no prints) ———
 def _orig_scalar_mult(k, P):
     result = None
     addend = P
-    step = 0
     while k:
-        print(f"\n=== Step {step} ===")
-        print(f"k bit: {k & 1}")
         if k & 1:
-            print("\n[Point Addition]")
-            print_point("result", result)
-            print_point("addend", addend)
             result = point_add(result, addend)
-            print_point("New result", result)
-        print("\n[Point Doubling]")
-        print_point("addend", addend)
         addend = point_add(addend, addend)
-        print_point("Doubled addend", addend)
         k >>= 1
-        step += 1
-    print("\n=== Final Output ===")
-    print_point("k*P", result)
     return result
 
-
-def print_point(label, P):
-    if P is None:
-        print(f"{label}: Point at Infinity")
-    else:
-        x, y = P
-        print(f"{label}:\n  x = {hex(x)}\n  y = {hex(y)}")
-
-# ——— Instrumented wrapper for scalar_mult ———
+# ——— Instrumented wrapper for scalar_mult (time profiling only) ———
 _scalar_mult_calls = 0
 _scalar_mult_time  = 0.0
 
 def scalar_mult(k, P):
     global _scalar_mult_calls, _scalar_mult_time
-
-    # Helper to hex-ify any iterable of ints
-    def to_hex_tuple(pt):
-        return tuple(hex(coord) for coord in pt)
-
-    print(f"scalar_mult called with k={hex(k)}, P={to_hex_tuple(P)}")
-
     start = time.perf_counter()
     R = _orig_scalar_mult(k, P)
     elapsed = time.perf_counter() - start
-
     _scalar_mult_calls += 1
     _scalar_mult_time  += elapsed
-
-    print(f"scalar_mult returning R={to_hex_tuple(R)}")
-
     return R
-
 
 # ——— Key generation ———
 def gen_keypair():
@@ -134,36 +106,52 @@ def verify(msg: bytes, sig: tuple, pub: tuple) -> bool:
     x1, _ = X
     return (x1 % n) == r
 
-if __name__ == "__main__":
-    # --- start global timer ---
-    overall_start = time.perf_counter()
+# --- Experiment over multiple message sizes ---
+message_sizes = [1*1024*1024, 2*1024*1024, 4*1024*1024, 8*1024*1024]  # bytes
+results = []
 
-    # Generate a keypair and sign+verify a 4 MiB message
+for size in message_sizes:
+    # Reset counters
+    _scalar_mult_calls = 0
+    _scalar_mult_time = 0.0
+
+    # Start timing
+    start_total = time.perf_counter()
+
+    # Run keygen, sign, verify on message of given size
     priv, pub = gen_keypair()
-    msg = b"A" * (4096 * 4096)  # 4 MiB
-
+    msg = b"A" * size
     sig = sign(msg, priv)
-    ok  = verify(msg, sig, pub)
-    print("Verified on 4 MiB message:", ok)
+    ok = verify(msg, sig, pub)
 
-    # --- scalar_mult stats ---
-    print(f"\nscalar_mult was called: {_scalar_mult_calls} times")
-    print(f"total time in scalar_mult: {_scalar_mult_time:.6f} seconds")
-    print(f"average time per call: {_scalar_mult_time/_scalar_mult_calls:.6f} seconds")
+    # End timing
+    end_total = time.perf_counter()
+    total_elapsed = end_total - start_total
 
-    # --- end global timer and report ---
-    overall_end = time.perf_counter()
-    total_elapsed = overall_end - overall_start
-    print(f"\nTotal script execution time: {total_elapsed:.6f} seconds")
-    print(f"Percentage of total time in scalar_mult: {(_scalar_mult_time /total_elapsed) * 100:.2f}%")
+    # Record results
+    results.append({
+        "Message Size (MiB)": size / (1024*1024),
+        "Verified": ok,
+        "Scalar_Mult Calls": _scalar_mult_calls,
+        "Scalar_Mult Time (s)": _scalar_mult_time,
+        "Total Time (s)": total_elapsed,
+        "Percent in Scalar_Mult": (_scalar_mult_time / total_elapsed) * 100
+    })
 
-    Gx = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
-    Gy = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
-    G = (Gx, Gy)
-    k = 2
+# Create DataFrame
+df = pd.DataFrame(results)
 
-    R = scalar_mult(k, G)
-    print(G)
-    print(R)
-    # Output will be (expected_x3, expected_y3) in decimal, convert to hex for Verilog
+# Plot Total Time and Scalar_Mult Time vs Message Size
+plt.figure(figsize=(8, 5))
+plt.plot(df["Message Size (MiB)"], df["Total Time (s)"], marker='o', label="Total Time")
+plt.plot(df["Message Size (MiB)"], df["Scalar_Mult Time (s)"], marker='s', label="Scalar_Mult Time")
+plt.xlabel("Message Size (MiB)")
+plt.ylabel("Time (s)")
+plt.title("Time vs Message Size")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
 
+# Display the DataFrame
+import ace_tools as tools; tools.display_dataframe_to_user(name="Timing Results", dataframe=df)
