@@ -91,8 +91,9 @@ module point_add (
     // Instantiate modular subtractions and additions:
     // Each mod_sub does (A - B) mod p, using the corrected code above.
     mod_sub u_sub_y2_y1 (
-        .A(lx2), .B(ly1), .R(sub_y2_y1)
+        .A(ly2), .B(ly1), .R(sub_y2_y1)
     );
+
     mod_sub u_sub_x2_x1 (
         .A(lx2), .B(lx1), .R(sub_x2_x1)
     );
