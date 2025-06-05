@@ -143,7 +143,7 @@ module point_add (
     );
 
     // ────────────────────────────────────────────────────────────────────────
-    // FSM + register updates (with debug $display):
+    // FSM + register updates (debug statements commented out)
     // ────────────────────────────────────────────────────────────────────────
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -173,39 +173,39 @@ module point_add (
                         lx1   <= x1;   ly1 <= y1;
                         lx2   <= x2;   ly2 <= y2;
                         linf1 <= inf1; linf2 <= inf2;
-                        $display("IDLE->CHECK_INF: P=(%h,%h), Q=(%h,%h), inf1=%b, inf2=%b",
-                                  x1, y1, x2, y2, inf1, inf2);
+                        // $display("IDLE->CHECK_INF: P=(%h,%h), Q=(%h,%h), inf1=%b, inf2=%b",
+                        //          x1, y1, x2, y2, inf1, inf2);
                     end
                 end
 
                 CHECK_INF: begin
-                    $display("CHECK_INF->CHECK_NEG");
+                    // $display("CHECK_INF->CHECK_NEG");
                 end
 
                 CHECK_NEG: begin
                     is_double <= (!linf1 && !linf2 && (lx1 == lx2) && (ly1 == ly2));
                     is_neg    <= (!linf1 && !linf2 && (lx1 == lx2) &&
                                  ((ly1 + ly2) == P_CONST));
-                    $display("CHECK_NEG: is_double=%b, is_neg=%b", is_double, is_neg);
+                    // $display("CHECK_NEG: is_double=%b, is_neg=%b", is_double, is_neg);
                 end
 
                 PREP_CALC: begin
-                    $display("PREP_CALC: linf1=%b, linf2=%b, is_neg=%b, is_double=%b",
-                              linf1, linf2, is_neg, is_double);
+                    // $display("PREP_CALC: linf1=%b, linf2=%b, is_neg=%b, is_double=%b",
+                    //           linf1, linf2, is_neg, is_double);
                     if (linf1) begin
                         x3   <= lx2;  y3 <= ly2;
                         inf3 <= linf2;
                         done <= 1'b1;
-                        $display("PREP_CALC: P is ∞ → R=Q=(%h,%h)", lx2, ly2);
+                        // $display("PREP_CALC: P is ∞ → R=Q=(%h,%h)", lx2, ly2);
                     end else if (linf2) begin
                         x3   <= lx1;  y3 <= ly1;
                         inf3 <= linf1;
                         done <= 1'b1;
-                        $display("PREP_CALC: Q is ∞ → R=P=(%h,%h)", lx1, ly1);
+                        // $display("PREP_CALC: Q is ∞ → R=P=(%h,%h)", lx1, ly1);
                     end else if (is_neg) begin
                         inf3 <= 1'b1;
                         done <= 1'b1;
-                        $display("PREP_CALC: P + (−P) → ∞");
+                        // $display("PREP_CALC: P + (−P) → ∞");
                     end else begin
                         inf3 <= 1'b0;
                         if (is_double) begin
@@ -213,14 +213,14 @@ module point_add (
                             mul_start <= 1'b1;
                             mul_a     <= lx1;
                             mul_b     <= lx1;
-                            $display("PREP_CALC: Doubling → start mul x1*x1 = %h * %h",
-                                      lx1, lx1);
+                            // $display("PREP_CALC: Doubling → start mul x1*x1 = %h * %h",
+                            //           lx1, lx1);
                         end else begin
                             // Addition path: num = (y2 - y1) mod p, den = (x2 - x1) mod p
                             num <= sub_y2_y1;
                             den <= sub_x2_x1;
-                            $display("PREP_CALC: Addition → num=y2-y1=%h, den=x2-x1=%h",
-                                      sub_y2_y1, sub_x2_x1);
+                            // $display("PREP_CALC: Addition → num=y2-y1=%h, den=x2-x1=%h",
+                            //           sub_y2_y1, sub_x2_x1);
                         end
                     end
                 end
@@ -228,9 +228,9 @@ module point_add (
                 WAIT_X1SQ: begin
                     if (mul_done) begin
                         x1_sq_reg <= mul_r;  // x1²
-                        $display("WAIT_X1SQ: mul_done, x1_sq=%h", mul_r);
-                        $display("WAIT_X1SQ: (two_x1_sq next)=%h, (three_x1_sq next)=%h, two_y1=%h",
-                                  two_x1_sq, three_x1_sq, two_y1);
+                        // $display("WAIT_X1SQ: mul_done, x1_sq=%h", mul_r);
+                        // $display("WAIT_X1SQ: (two_x1_sq next)=%h, (three_x1_sq next)=%h, two_y1=%h",
+                        //           two_x1_sq, three_x1_sq, two_y1);
                     end
                 end
 
@@ -239,25 +239,25 @@ module point_add (
                     num       <= three_x1_sq;
                     den       <= two_y1;
                     inv_start <= 1'b1;
-                    $display("CALC_DBL: num=3*x1^2=%h, den=2*y1=%h; start mod_inv",
-                              three_x1_sq, two_y1);
+                    // $display("CALC_DBL: num=3*x1^2=%h, den=2*y1=%h; start mod_inv",
+                    //           three_x1_sq, two_y1);
                 end
 
                 START_INV: begin
                     if (!is_double) begin
                         // Addition path: assert inv_start now
                         inv_start <= 1'b1;
-                        $display("START_INV (addition): num=%h, den=%h; asserting inv_start",
-                                  num, den);
+                        // $display("START_INV (addition): num=%h, den=%h; asserting inv_start",
+                        //           num, den);
                     end else begin
                         // Doubling path: inv_start was asserted in CALC_DBL
-                        $display("START_INV (doubling): waiting for inv_done");
+                        // $display("START_INV (doubling): waiting for inv_done");
                     end
                 end
 
                 WAIT_INV: begin
                     if (inv_done) begin
-                        $display("WAIT_INV: inv_done, den_inv=%h", den_inv);
+                        // $display("WAIT_INV: inv_done, den_inv=%h", den_inv);
                     end
                 end
 
@@ -265,13 +265,13 @@ module point_add (
                     mul_start <= 1'b1;
                     mul_a     <= num;
                     mul_b     <= den_inv;
-                    $display("START_LAM: start mul num*den_inv = %h * %h", num, den_inv);
+                    // $display("START_LAM: start mul num*den_inv = %h * %h", num, den_inv);
                 end
 
                 WAIT_LAM: begin
                     if (mul_done) begin
                         lam <= mul_r;
-                        $display("WAIT_LAM: mul_done, lam=%h", mul_r);
+                        // $display("WAIT_LAM: mul_done, lam=%h", mul_r);
                     end
                 end
 
@@ -279,34 +279,34 @@ module point_add (
                     mul_start <= 1'b1;
                     mul_a     <= lam;
                     mul_b     <= lam;
-                    $display("START_LAM_SQ: start mul lam*lam = %h * %h", lam, lam);
+                    // $display("START_LAM_SQ: start mul lam*lam = %h * %h", lam, lam);
                 end
 
                 WAIT_LAM_SQ: begin
                     if (mul_done) begin
                         lam_sq <= mul_r;
-                        $display("WAIT_LAM_SQ: mul_done, lam_sq=%h", mul_r);
-                        $display("WAIT_LAM_SQ: add_x1_x2=%h", add_x1_x2);
+                        // $display("WAIT_LAM_SQ: mul_done, lam_sq=%h", mul_r);
+                        // $display("WAIT_LAM_SQ: add_x1_x2=%h", add_x1_x2);
                     end
                 end
 
                 CALC_X3: begin
                     // x3 = lam_sq - (x1 + x2)
                     x3 <= sub_lam_sq_x1x2;
-                    $display("CALC_X3: x3 = lam_sq - (x1 + x2) = %h", sub_lam_sq_x1x2);
+                    // $display("CALC_X3: x3 = lam_sq - (x1 + x2) = %h", sub_lam_sq_x1x2);
                 end
 
                 START_Y: begin
                     mul_start <= 1'b1;
                     mul_a     <= lam;
                     mul_b     <= sub_x1_x3;
-                    $display("START_Y: start mul lam*(x1-x3) = %h * %h", lam, sub_x1_x3);
+                    // $display("START_Y: start mul lam*(x1-x3) = %h * %h", lam, sub_x1_x3);
                 end
 
                 WAIT_Y: begin
                     if (mul_done) begin
                         mult_lam_x1_x3 <= mul_r;
-                        $display("WAIT_Y: mul_done, lam*(x1-x3)=%h", mul_r);
+                        // $display("WAIT_Y: mul_done, lam*(x1-x3)=%h", mul_r);
                     end
                 end
 
@@ -315,12 +315,12 @@ module point_add (
                     y3   <= sub_mult_y1;
                     done <= 1'b1;
                     inf3 <= 1'b0;
-                    $display("CALC_Y: lam*(x1-x3)=%h, y3=%h",
-                              mult_lam_x1_x3, sub_mult_y1);
+                    // $display("CALC_Y: lam*(x1-x3)=%h, y3=%h",
+                    //           mult_lam_x1_x3, sub_mult_y1);
                 end
 
                 DONE_STATE: begin
-                    $display("DONE_STATE: x3=%h, y3=%h, inf3=%b", x3, y3, inf3);
+                    // $display("DONE_STATE: x3=%h, y3=%h, inf3=%b", x3, y3, inf3);
                 end
 
                 default: begin
