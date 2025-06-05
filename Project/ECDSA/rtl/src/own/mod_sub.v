@@ -1,45 +1,36 @@
 // File: src/mod_sub.v
-// ?????????????????????????????????????????????????????????????????????????
-// Compute R = (A ? B) mod p, where p = 0xFFFFFFFF?FFFFFC2F (secp256k1).
-//   If A ? B:   R = A ? B
-//   Else:       R = p ? (B ? A)
-// No 256-bit underflow?always reduces correctly mod p.
-// ?????????????????????????????????????????????????????????????????????????
+// ──────────────────────────────────────────────────────────────────────────
+// Compute R = (A – B) mod p, where p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F.
+//   If A ≥ B:   R = A – B
+//   Else:       R = p – (B – A)
+// Always reduces correctly mod p (no 256-bit underflow).
+// ──────────────────────────────────────────────────────────────────────────
 
 module mod_sub (
     input  wire [255:0] A,
     input  wire [255:0] B,
-    output reg [255:0] R
+    output reg  [255:0] R
 );
     // secp256k1 prime p
     localparam [255:0] P_CONST = 256'h
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F;
 
     // Compare A and B
-    wire a_ge_b = (A >= B);
+    wire a_ge_b    = (A >= B);
 
-    // Compute B ? A (valid when B > A, no underflow)
+    // Compute (B – A) when B > A (no underflow)
     wire [255:0] diff_ba = B - A;
 
-    // Compute A ? B (valid when A >= B)
+    // Compute (A – B) when A ≥ B
     wire [255:0] diff_ab = A - B;
-
-    // If A ? B ? R = A ? B; else ? R = p ? (B ? A)
- //   assign R = a_ge_b ? diff_ab : (P_CONST - diff_ba);
-	//if(a_ge_b == 1'b1) assign R = diff_ab;
 
     always @(*) begin
         if (a_ge_b) begin
             R = diff_ab;
-            $display("mod_sub: A >= B ? diff_ab = %h", diff_ab);
+         //  $display("mod_sub: A ≥ B → diff_ab = %h", diff_ab);
         end else begin
             R = P_CONST - diff_ba;
-            $display("mod_sub: A < B  ? p - (B - A) = %h", P_CONST - diff_ba);
+          //  $display("mod_sub: A < B  → p – (B – A) = %h", P_CONST - diff_ba);
         end
     end
-/*
-assign R = a_ge_b
-               ? begin diff_ab $display("[MOD SUB] A>B"); end
-               : begin $display("[MOD SUB] B > A "); (P_CONST - diff_ba)end;  */
 endmodule
-
