@@ -122,7 +122,7 @@ module scalar_mul (
                         pa_x2    <= currP_x;  pa_y2 <= currP_y;  pa_inf2 <= currP_inf;
                         pa_start <= 1'b1;
                         astate   <= A_ADD_WAIT;
-                        $display("\n[ADD_START] bit %0d: R += P", bit_index);
+                       // $display("\n[ADD_START] bit %0d: R += P", bit_index);
                     end else begin
                         astate <= A_DBL_START;
                     end
@@ -133,7 +133,7 @@ module scalar_mul (
                     if (pa_done_rising) begin
                         R_x   <= pa_x3;  R_y   <= pa_y3;  R_inf <= pa_inf3;
                         astate <= A_DBL_START;
-                        $display("[ADD_DONE] -> R = (%h, %h, inf=%b)", pa_x3, pa_y3, pa_inf3);
+                      //  $display("[ADD_DONE] -> R = (%h, %h, inf=%b)", pa_x3, pa_y3, pa_inf3);
                     end
                 end
 
@@ -144,7 +144,7 @@ module scalar_mul (
                     pa_x2    <= currP_x;  pa_y2 <= currP_y;  pa_inf2 <= currP_inf;
                     pa_start <= 1'b1;
                     astate   <= A_DBL_WAIT;
-                    $display("\n[DBL_START] bit %0d: P = 2*P", bit_index);
+                  //  $display("\n[DBL_START] bit %0d: P = 2*P", bit_index);
                 end
 
                 //------------------------------------------------
@@ -156,7 +156,7 @@ module scalar_mul (
                         scalar_reg  <= scalar_reg >> 1;
                         bit_index   <= bit_index - 1;
                         astate      <= A_IDLE;
-                        $display("[DBL_DONE] -> P = (%h, %h, inf=%b)", pa_x3, pa_y3, pa_inf3);
+                      //  $display("[DBL_DONE] -> P = (%h, %h, inf=%b)", pa_x3, pa_y3, pa_inf3);
                     end
                 end
 
