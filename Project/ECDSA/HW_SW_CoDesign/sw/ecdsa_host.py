@@ -1,6 +1,9 @@
 import hashlib
 import secrets
 
+# Choose between HW and SW scalar multiplication here:
+USE_HW = False  # Toggle this to True to use RTL version
+
 # ——— Domain parameters for secp256k1 ———
 p  = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
 a  = 0
@@ -51,9 +54,6 @@ def sw_scalar_mult(k, P):
         addend = point_add(addend, addend)
         k >>= 1
     return result
-
-# Choose between HW and SW scalar multiplication here:
-USE_HW = False  # Toggle this to True to use RTL version
 
 def scalar_mult(k, P):
     if USE_HW:
