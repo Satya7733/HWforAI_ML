@@ -38,10 +38,8 @@ def print_point(label, P):
 
 # ——— EC arithmetic with logging ———
 def point_add(P, Q):
-    if P is None:
-        return Q
-    if Q is None:
-        return P
+    if P is None: return Q
+    if Q is None: return P
     x1, y1 = P
     x2, y2 = Q
     if x1 == x2 and (y1 + y2) % p == 0:
@@ -81,12 +79,17 @@ def _orig_scalar_mult(k, P):
     print_point("k*P", result)
     return result
 
-# ——— Wrapper for timing the scalar mult ———
+# ——— Wrapper for timing and logging the start of each scalar_mult ———
 _scalar_mult_calls = 0
 _scalar_mult_time  = 0.0
 
 def scalar_mult(k, P):
     global _scalar_mult_calls, _scalar_mult_time
+    # Log the start of this scalar multiplication
+    print(f"\n**** New scalar_mult ****", file=log)
+    print(f"Scalar k = {hex(k)}", file=log)
+    print_point("Point P", P)
+    # Time the actual EC loop
     start = time.perf_counter()
     R = _orig_scalar_mult(k, P)
     elapsed = time.perf_counter() - start

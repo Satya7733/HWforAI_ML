@@ -28,36 +28,6 @@ module tb_scalar_mul;
         .inf_out (inf_out)
     );
 
-    // Generator G
-    localparam [255:0] Gx =
-        256'h79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798;
-    localparam [255:0] Gy =
-        256'h483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8;
-
-    // 2·G
-    localparam [255:0] _2Gx =
-        256'hC6047F9441ED7D6D3045406E95C07CD85C778E4B8CEF3CA7ABAC09B95C709EE5;
-    localparam [255:0] _2Gy =
-        256'h1AE168FEA63DC339A3C58419466CEAE7F632653266D0E1236431A950CFE52A;
-
-    // 3·G
-    localparam [255:0] _3Gx =
-        256'hF9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9;
-    localparam [255:0] _3Gy =
-        256'h388F7B0F632DE8140FE337E62A37F3566500A99934C2231B6CB9FD7584B8E672;
-
-    // Arbitrary point for doubling test
-    localparam [255:0] Pdx =
-        256'h4A991F7C44E0C3796364193ADBB82DD47964B6431C79A9A3685CA2423C373ACF;
-    localparam [255:0] Pdy =
-        256'h605EECCB3BFDABDAFF7916274EFB8C992F8F52BCF1BA318BDDBB60915B94D755;
-
-    // 2·P (expected doubling)
-    localparam [255:0] D2x =
-        256'hF015694A1F7E48E1481CE48190CE72A8FF0CD85E3093274588EB8D46291222CC;
-    localparam [255:0] D2y =
-        256'h2618750BD614F01D5787BD5CDD4392880F5D929404145EC80DFDA85C03481C8C;
-
     // Clock: 10 ns period
     initial begin
         clk = 1'b0;
@@ -107,49 +77,48 @@ module tb_scalar_mul;
         rst_n = 1'b1;
         #10;
 
-        // 1) k = 0, P = G → R = ∞
+        // New scalar_mul test vectors
+        // 1) k = 0x48d609a1707b040f841e68f39ede58adca4c75a55925a68b9486fdc19d34b833, P = G
         check_mul(
-            256'h0,
-            Gx, Gy,
+            256'h48d609a1707b040f841e68f39ede58adca4c75a55925a68b9486fdc19d34b833,
+            256'h79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
+            256'h483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8,
             1'b0,
-            256'h0,    // Xout irrelevant
-            256'h0,    // Yout irrelevant
-            1'b1     // infinity
-        );
-
-        // 2) k = 1, P = G → R = G
-        check_mul(
-            256'h1,
-            Gx, Gy,
-            1'b0,
-            Gx, Gy,
+            256'h882f2f952e5edaf3358caa809d1d257e97b0a218a2ac564d4ce75f5836bad700,
+            256'he57a34cf3374089ff2cc2915e5088264bd5ae47a4aa53f25114359f96fa622b5,
             1'b0
         );
 
-        // 3) k = 2, P = G → R = 2·G
+        // 2) k = 0x4a019c8985f28c492d855551a95880dca452ff2de3365888c110f02756ab748e, P = G
         check_mul(
-            256'h2,
-            Gx, Gy,
+            256'h4a019c8985f28c492d855551a95880dca452ff2de3365888c110f02756ab748e,
+            256'h79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
+            256'h483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8,
             1'b0,
-            _2Gx, _2Gy,
+            256'hc36f3030440c42b6097dffa8e19ff9390362c140813243bae11e19f548c4c08,
+            256'h3d92f41b8c513613e3e3d5c34afc0356eedfd8b009a0b935bb693c29095c1cd7,
             1'b0
         );
 
-        // 4) k = 3, P = G → R = 3·G
+        // 3) k = 0xeb7d15c91943322d52adceb49a0935de9e035003ce58ab033c573acebf5a6f39, P = G
         check_mul(
-            256'h3,
-            Gx, Gy,
+            256'heb7d15c91943322d52adceb49a0935de9e035003ce58ab033c573acebf5a6f39,
+            256'h79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
+            256'h483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8,
             1'b0,
-            _3Gx, _3Gy,
+            256'h3be8d91b4c9aa49d86d209b18de8a8da1c8f337d0f1e56b12dcf41b161a2ac1b,
+            256'h17d775a1d243979fa659f365b63f461ddab50283b400055988bd56419ae5c09d,
             1'b0
         );
 
-        // 5) k = 2, P = arbitrary Pd → R = 2·Pd (point doubling test)
+        // 4) k = 0xc923d186078acbbbfd29b52ab1d6d9efc0eb582ecbf570da8352e26898aa426f, P = previous result
         check_mul(
-            256'h2,
-            Pdx, Pdy,
+            256'hc923d186078acbbbfd29b52ab1d6d9efc0eb582ecbf570da8352e26898aa426f,
+            256'h882f2f952e5edaf3358caa809d1d257e97b0a218a2ac564d4ce75f5836bad700,
+            256'he57a34cf3374089ff2cc2915e5088264bd5ae47a4aa53f25114359f96fa622b5,
             1'b0,
-            D2x, D2y,
+            256'hb7d59381097f9511e2ea9ddf57c31495ca86f4e990157d046c6b7768c048b12b,
+            256'h7e57e005f53874f3ef916e722e2befca3108b806942ad4b4ad47aaa6596c918c,
             1'b0
         );
 
@@ -157,4 +126,3 @@ module tb_scalar_mul;
         $finish;
     end
 endmodule
-

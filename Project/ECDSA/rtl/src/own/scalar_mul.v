@@ -1,303 +1,195 @@
-// File: src/scalar_mul.v
-// ──────────────────────────────────────────────────────────────────────────
-// Synthesizable Verilog for secp256k1 scalar‐multiplication using
-// “double‐and‐add.”  Given a 256-bit scalar k and an input point P=(Px,Py),
-// it computes R = k·P (affine) on secp256k1.  When `start`=1, it begins
-// processing from the MSB of k; once all bits are done, it asserts `done`
-// for one cycle and presents (Xout,Yout,inf_out).
-// Debug $display statements have been added to trace execution.
-// We have reordered BIT_LOOP so that “double currP” (E) comes before
-// “R + currP” (C), preventing the infinite‐loop bug.
-// ──────────────────────────────────────────────────────────────────────────
-
 `timescale 1ns/1ps
 
 module scalar_mul (
     input  wire         clk,
     input  wire         rst_n,
-    input  wire         start,       // 1‐cycle pulse to begin k·P
-    input  wire [255:0] k,           // scalar multiplier
-    input  wire [255:0] Px, Py,      // base point P
-    input  wire         Pinf,        // 1 if P = ∞
+    input  wire         start,
+    input  wire [255:0] k,
+    input  wire [255:0] Px, Py,
+    input  wire         Pinf,
 
-    output reg          done,        // goes high for exactly 1 cycle when result ready
-    output reg  [255:0] Xout, Yout,  // resulting point coordinates
-    output reg         inf_out       // 1 if result = ∞
+    output reg          done,
+    output reg  [255:0] Xout, Yout,
+    output reg         inf_out
 );
 
-    // FSM states
+    // top FSM states
     localparam [1:0]
         IDLE       = 2'd0,
         INIT       = 2'd1,
         BIT_LOOP   = 2'd2,
         DONE_STATE = 2'd3;
 
-    reg [1:0] state, next_state;
+    // micro-FSM states inside BIT_LOOP
+    localparam [2:0]
+        A_IDLE      = 3'd0,
+        A_ADD_START = 3'd1,
+        A_ADD_WAIT  = 3'd2,
+        A_DBL_START = 3'd3,
+        A_DBL_WAIT  = 3'd4;
 
-    //--------------
-    // “Working” registers
-    //--------------
+    reg [1:0]  state, next_state;
+    reg [2:0]  astate;
+
+    // Working registers
     reg [255:0] scalar_reg;
-    reg [7:0]   bit_index;    // from 255 down to 0
+    reg [7:0]   bit_index;
 
-    // “Accumulator” registers for R and “running” value for P
-    // R starts at ∞; currP starts at input P.
+    // Accumulators
     reg  [255:0] R_x, R_y;
     reg          R_inf;
     reg  [255:0] currP_x, currP_y;
     reg          currP_inf;
 
-    // Signals to point_add
+    // point_add interface
     reg           pa_start;
     reg  [255:0]  pa_x1, pa_y1;
     reg           pa_inf1;
     reg  [255:0]  pa_x2, pa_y2;
     reg           pa_inf2;
-
     wire          pa_done;
     wire [255:0]  pa_x3, pa_y3;
     wire          pa_inf3;
 
-    // “flip‐flop” to detect rising edge of pa_done
+    // edge-detect
     reg pa_done_prev;
     always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            pa_done_prev <= 1'b0;
-        end else begin
-            pa_done_prev <= pa_done;
-        end
+        if (!rst_n) pa_done_prev <= 1'b0;
+        else         pa_done_prev <= pa_done;
     end
-    wire pa_done_rising = (pa_done && !pa_done_prev);
+    wire pa_done_rising = pa_done && !pa_done_prev;
 
-    //--------------
-    // One‐bit “launch_flag” prevents pa_start from reasserting until the 
-    // previous point_add has actually gone high and then low again. 
-    //--------------
-    reg launch_flag;
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            launch_flag <= 1'b0;
-        end else if (pa_done_prev && !pa_done) begin
-            // Once pa_done finished its 1-cycle high, clear flag
-            launch_flag <= 1'b0;
-        end
-    end
-
-    // Instantiate point_add (assumes point_add.v is in the same folder)
+    // point_add instance
     point_add u_point_add (
-        .clk   (clk),
-        .rst_n (rst_n),
+        .clk   (clk),   .rst_n (rst_n),
         .start (pa_start),
-        .x1    (pa_x1),
-        .y1    (pa_y1),
-        .inf1  (pa_inf1),
-        .x2    (pa_x2),
-        .y2    (pa_y2),
-        .inf2  (pa_inf2),
+        .x1    (pa_x1), .y1 (pa_y1), .inf1(pa_inf1),
+        .x2    (pa_x2), .y2 (pa_y2), .inf2(pa_inf2),
         .done  (pa_done),
-        .x3    (pa_x3),
-        .y3    (pa_y3),
-        .inf3  (pa_inf3)
+        .x3    (pa_x3), .y3 (pa_y3), .inf3(pa_inf3)
     );
 
-    //--------------
-    // FSM sequential: state transitions
-    //--------------
+    // top-level FSM sequential
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
-            state <= IDLE;
+            state       <= IDLE;
+            done        <= 1'b0;
+            scalar_reg  <= 256'd0;
+            bit_index   <= 8'd0;
+            R_x         <= 256'h0;  R_y <= 256'h0; R_inf  <= 1'b1;
+            currP_x     <= 256'h0;  currP_y <= 256'h0; currP_inf <= 1'b1;
+            pa_start    <= 1'b0;
+            pa_x1       <= 256'h0;  pa_y1 <= 256'h0;  pa_inf1 <= 1'b0;
+            pa_x2       <= 256'h0;  pa_y2 <= 256'h0;  pa_inf2 <= 1'b0;
+            Xout        <= 256'h0;  Yout <= 256'h0;   inf_out <= 1'b1;
+            astate      <= A_IDLE;
         end else begin
             state <= next_state;
-        end
-    end
-
-    //--------------
-    // FSM combinational: next_state logic
-    //--------------
-    always @(*) begin
-        next_state = state;
-        case (state)
-            IDLE: begin
-                if (start) next_state = INIT;
-            end
-
-            INIT: begin
-                next_state = BIT_LOOP;
-            end
-
-            BIT_LOOP: begin
-                // If final bit's doubling (of currP) finishes, go to DONE_STATE
-                if (pa_done_rising && (bit_index == 8'd0)) begin
-                    next_state = DONE_STATE;
-                end else begin
-                    next_state = BIT_LOOP;
-                end
-            end
-
-            DONE_STATE: begin
-                next_state = IDLE;
-            end
-
-            default: begin
-                next_state = IDLE;
-            end
-        endcase
-    end
-
-    //--------------
-    // Main datapath + control with $display debug
-    //--------------
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            done         <= 1'b0;
-            scalar_reg   <= 256'd0;
-            bit_index    <= 8'd0;
-            R_x          <= 256'h0;
-            R_y          <= 256'h0;
-            R_inf        <= 1'b1;   // start with R = ∞
-            currP_x      <= 256'h0;
-            currP_y      <= 256'h0;
-            currP_inf    <= 1'b1;   // will be overwritten in INIT
-            pa_start     <= 1'b0;
-            pa_x1        <= 256'h0;
-            pa_y1        <= 256'h0;
-            pa_inf1      <= 1'b0;
-            pa_x2        <= 256'h0;
-            pa_y2        <= 256'h0;
-            pa_inf2      <= 1'b0;
-            Xout         <= 256'h0;
-            Yout         <= 256'h0;
-            inf_out      <= 1'b1;
-            launch_flag  <= 1'b0;
-        end else begin
-            // Default: do not re‐assert pa_start or done unless set below
+            // clear add start each cycle
             pa_start <= 1'b0;
             done     <= 1'b0;
 
             case (state)
-                //--------------------------------------------
-                IDLE: begin
-                    // wait for start
+            //--------------------------------------------
+            IDLE: begin
+                // nothing until start
+            end
+
+            //--------------------------------------------
+            INIT: begin
+                scalar_reg <= k;
+                bit_index  <= 8'd255;
+                R_inf      <= 1'b1;
+                R_x        <= 256'h0;  R_y <= 256'h0;
+                currP_x    <= Px;       currP_y <= Py;
+                currP_inf  <= Pinf;
+                astate     <= A_IDLE;
+
+                $display("\n**** New scalar_mult ****");
+                $display("Scalar k = %h", k);
+                $display("Point P = (%h, %h, inf=%b)", Px, Py, Pinf);
+            end
+
+            //--------------------------------------------
+            BIT_LOOP: begin
+                // micro-FSM for “if LSB then add R+=P; always double P; shift k”
+                case (astate)
+                //------------------------------------------------
+                A_IDLE: begin
+                    if (scalar_reg[0]) begin
+                        // R = R + P
+                        pa_x1    <= R_x;      pa_y1 <= R_y;      pa_inf1 <= R_inf;
+                        pa_x2    <= currP_x;  pa_y2 <= currP_y;  pa_inf2 <= currP_inf;
+                        pa_start <= 1'b1;
+                        astate   <= A_ADD_WAIT;
+                        $display("\n[ADD_START] bit %0d: R += P", bit_index);
+                    end else begin
+                        astate <= A_DBL_START;
+                    end
                 end
 
-                //--------------------------------------------
-                INIT: begin
-                    // Latch inputs
-                    scalar_reg <= k;
-                    bit_index  <= 8'd255;
-                    // R := ∞
-                    R_inf   <= 1'b1;
-                    R_x     <= 256'h0;
-                    R_y     <= 256'h0;
-                    // currP := input P
-                    currP_x   <= Px;
-                    currP_y   <= Py;
-                    currP_inf <= Pinf;
-                    launch_flag <= 1'b0;
-                    $display("INIT: k=%h, P=(%h,%h,inf=%b)", k, Px, Py, Pinf);
+                //------------------------------------------------
+                A_ADD_WAIT: begin
+                    if (pa_done_rising) begin
+                        R_x   <= pa_x3;  R_y   <= pa_y3;  R_inf <= pa_inf3;
+                        astate <= A_DBL_START;
+                        $display("[ADD_DONE] -> R = (%h, %h, inf=%b)", pa_x3, pa_y3, pa_inf3);
+                    end
                 end
 
-                //--------------------------------------------
-                BIT_LOOP: begin
-                    // — (D) If pa_done has fallen, double currP & decrement bit_index
-                    if (pa_done_prev && !pa_done) begin
-                        pa_x1      <= currP_x;
-                        pa_y1      <= currP_y;
-                        pa_inf1    <= currP_inf;
-                        pa_x2      <= currP_x;
-                        pa_y2      <= currP_y;
-                        pa_inf2    <= currP_inf;
-                        pa_start   <= 1'b1;
-                        launch_flag<= 1'b1;
-                        $display("BIT_LOOP[%0d]: Doubling currP=(%h,%h,inf=%b)",
-                                 bit_index, currP_x, currP_y, currP_inf);
-                    end
-
-                    // — (A) If no operation in flight, start doubling R
-                    else if (!launch_flag) begin
-                        pa_x1      <= R_x;
-                        pa_y1      <= R_y;
-                        pa_inf1    <= R_inf;
-                        pa_x2      <= R_x;
-                        pa_y2      <= R_y;
-                        pa_inf2    <= R_inf;
-                        pa_start   <= 1'b1;
-                        launch_flag<= 1'b1;
-                        $display("BIT_LOOP[%0d]: Doubling R=(%h,%h,inf=%b)",
-                                 bit_index, R_x, R_y, R_inf);
-                    end
-
-                    // — (B) When doubling R finishes (R + R):
-                    else if (pa_done_rising && (pa_x2 == R_x && pa_inf2 == R_inf) ) begin
-                        R_x   <= pa_x3;
-                        R_y   <= pa_y3;
-                        R_inf <= pa_inf3;
-                        $display("DOUBLE_R_DONE[%0d]: R<= (%h,%h,inf=%b)",
-                                 bit_index, pa_x3, pa_y3, pa_inf3);
-
-                        // If this bit is 1, do R := R + currP
-                        if (scalar_reg[bit_index] == 1'b1) begin
-                            pa_x1      <= pa_x3;    // new R
-                            pa_y1      <= pa_y3;
-                            pa_inf1    <= pa_inf3;
-                            pa_x2      <= currP_x;
-                            pa_y2      <= currP_y;
-                            pa_inf2    <= currP_inf;
-                            pa_start   <= 1'b1;
-                            launch_flag<= 1'b1;
-                            $display("BIT_LOOP[%0d]: Adding currP=(%h,%h,inf=%b) to R=(%h,%h,inf=%b)",
-                                     bit_index, currP_x, currP_y, currP_inf,
-                                     pa_x3, pa_y3, pa_inf3);
-                        end else begin
-                            launch_flag<= 1'b0;
-                        end
-                    end
-
-                    // — (E) When “doubling currP” finishes:
-                    else if (pa_done_rising &&
-                             pa_x1 == currP_x && pa_inf1 == currP_inf &&
-                             pa_x2 == currP_x && pa_inf2 == currP_inf) begin
-                        currP_x   <= pa_x3;
-                        currP_y   <= pa_y3;
-                        currP_inf <= pa_inf3;
-                        $display("DOUBLE_P_DONE[%0d]: currP<= (%h,%h,inf=%b)",
-                                 bit_index, pa_x3, pa_y3, pa_inf3);
-                        if (bit_index != 8'd0) begin
-                            bit_index <= bit_index - 8'd1;
-                            $display("BIT_LOOP: Next bit_index = %0d", bit_index - 8'd1);
-                        end
-                        launch_flag <= 1'b0;
-                    end
-
-                    // — (C) When “R + currP” finishes:
-                    else if (pa_done_rising &&
-                             pa_x2 == currP_x && pa_inf2 == currP_inf) begin
-                        R_x   <= pa_x3;
-                        R_y   <= pa_y3;
-                        R_inf <= pa_inf3;
-                        $display("ADD_DONE[%0d]: R<= (%h,%h,inf=%b)",
-                                 bit_index, pa_x3, pa_y3, pa_inf3);
-                        launch_flag <= 1'b0;
-                    end
-
-                    // Otherwise, idle until one of the above triggers
+                //------------------------------------------------
+                A_DBL_START: begin
+                    // P = 2 * P
+                    pa_x1    <= currP_x;  pa_y1 <= currP_y;  pa_inf1 <= currP_inf;
+                    pa_x2    <= currP_x;  pa_y2 <= currP_y;  pa_inf2 <= currP_inf;
+                    pa_start <= 1'b1;
+                    astate   <= A_DBL_WAIT;
+                    $display("\n[DBL_START] bit %0d: P = 2*P", bit_index);
                 end
 
-                //--------------------------------------------
-                DONE_STATE: begin
-                    Xout    <= R_x;
-                    Yout    <= R_y;
-                    inf_out <= R_inf;
-                    done    <= 1'b1;
-                    $display("DONE_STATE: Final R = (%h,%h,inf=%b)",
-                             R_x, R_y, R_inf);
+                //------------------------------------------------
+                A_DBL_WAIT: begin
+                    if (pa_done_rising) begin
+                        currP_x     <= pa_x3;
+                        currP_y     <= pa_y3;
+                        currP_inf   <= pa_inf3;
+                        scalar_reg  <= scalar_reg >> 1;
+                        bit_index   <= bit_index - 1;
+                        astate      <= A_IDLE;
+                        $display("[DBL_DONE] -> P = (%h, %h, inf=%b)", pa_x3, pa_y3, pa_inf3);
+                    end
                 end
 
-                //--------------------------------------------
-                default: begin
-                    // no‐op
-                end
+                default: astate <= A_IDLE;
+                endcase
+            end
+
+            //--------------------------------------------
+            DONE_STATE: begin
+                Xout    <= R_x;
+                Yout    <= R_y;
+                inf_out <= R_inf;
+                done    <= 1'b1;
+                $display("\n=== Final Output k*P ===");
+                $display("  x = %h", R_x);
+                $display("  y = %h", R_y);
+            end
+
+            default: ;
             endcase
         end
     end
+
+    // top-level FSM next-state
+    always @(*) begin
+        next_state = state;
+        case (state)
+            IDLE:       if (start)                         next_state = INIT;
+            INIT:                                         next_state = BIT_LOOP;
+            BIT_LOOP:  if (pa_done_rising && bit_index==0) next_state = DONE_STATE;
+            DONE_STATE:                                   next_state = IDLE;
+            default:                                      next_state = IDLE;
+        endcase
+    end
+
 endmodule
