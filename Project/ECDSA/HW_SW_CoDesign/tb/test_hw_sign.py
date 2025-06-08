@@ -1,3 +1,4 @@
+import os
 import cocotb
 from cocotb.triggers import RisingEdge, Timer
 
@@ -8,7 +9,12 @@ async def clock_gen(clk):
         clk.value = 1
         await Timer(5, units="ns")
 
-async def hw_scalar_mult(k: int, Px: int, Py: int, dut) -> tuple:
+async def hw_scalar_mult(dut) -> tuple:
+    # Parse inputs from environment variables
+    k = int(os.getenv("K_SCALAR"))
+    Px = int(os.getenv("PX"))
+    Py = int(os.getenv("PY"))
+
     # Ensure clock is running
     cocotb.start_soon(clock_gen(dut.clk))
 
@@ -40,4 +46,11 @@ async def hw_scalar_mult(k: int, Px: int, Py: int, dut) -> tuple:
     if inf:
         raise ValueError("Output point is at infinity")
 
+    print(f"RESULT_X={X}")
+    print(f"RESULT_Y={Y}")
+
     return (X, Y)
+
+@cocotb.test()
+async def run_hw_scalar_mult(dut):
+    await hw_scalar_mult(dut)

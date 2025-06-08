@@ -1,8 +1,10 @@
 import hashlib
 import secrets
+import os
+import subprocess
 
 # Choose between HW and SW scalar multiplication here:
-USE_HW = False  # Toggle this to True to use RTL version
+USE_HW = True  # Toggle this to True to use RTL version
 
 # ——— Domain parameters for secp256k1 ———
 p  = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
@@ -40,11 +42,37 @@ def point_add(P, Q):
     y3 = (lam*(x1 - x3) - y1) % p
     return (x3, y3)
 
-# Hardware-based scalar multiplication (to be integrated with RTL/Cocotb)
-def hw_scalar_mult(k, Px, Py):
-    raise NotImplementedError("This function must call your RTL scalar_mul module via cocotb or other means")
+# Hardware-based scalar multiplication via Cocotb/Questa
 
-# Software-based scalar multiplication (original version)
+def hw_scalar_mult(k: int, Px: int, Py: int) -> tuple:
+    env = os.environ.copy()
+    env["K_SCALAR"] = str(k)
+    env["PX"] = str(Px)
+    env["PY"] = str(Py)
+
+    # Get the absolute path to the tb/ directory
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    tb_dir = os.path.abspath(os.path.join(base_dir, "..", "tb"))
+    result = subprocess.run(["make", "-C", "tb", "SIM=questa"], env=env, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        print(result.stderr)
+        raise RuntimeError("Simulation failed")
+
+    X, Y = None, None
+    for line in result.stdout.splitlines():
+        if line.startswith("RESULT_X="):
+            X = int(line.split("=")[1])
+        if line.startswith("RESULT_Y="):
+            Y = int(line.split("=")[1])
+
+    if X is None or Y is None:
+        raise ValueError("Output values not found in simulation output")
+
+    return X, Y
+
+# Software-based scalar multiplication
+
 def sw_scalar_mult(k, P):
     result = None
     addend = P
@@ -57,7 +85,14 @@ def sw_scalar_mult(k, P):
 
 def scalar_mult(k, P):
     if USE_HW:
-        return hw_scalar_mult(k, P[0], P[1])
+        x1, y1 = hw_scalar_mult(k, P[0], P[1])
+        sw_x, sw_y = sw_scalar_mult(k, P)
+        if (x1, y1) != (sw_x, sw_y):
+            print("[MISMATCH] HW != SW")
+            print(f"HW: ({hex(x1)}, {hex(y1)})")
+            print(f"SW: ({hex(sw_x)}, {hex(sw_y)})")
+            raise ValueError("HW scalar_mult output does not match SW reference")
+        return x1, y1
     else:
         return sw_scalar_mult(k, P)
 
@@ -103,4 +138,4 @@ if __name__ == "__main__":
 
     sig = sign(msg, priv)
     ok  = verify(msg, sig, pub)
-    print("Verified on 1MB message:", ok)
+    print("Verified on 4MB message:", ok)
