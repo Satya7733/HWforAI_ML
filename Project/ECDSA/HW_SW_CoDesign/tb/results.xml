@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1749599987" />
+    <testcase classname="test_hw_sign" file="/u/satyajit/ECE510_HW_AI/HWforAI_ML/Project/ECDSA/HW_SW_CoDesign/tb/test_hw_sign.py" lineno="54" name="run_hw_scalar_mult" ratio_time="91981.67418655951" sim_time_ns="488474835.001" time="5310.566907167435" />
+  </testsuite>
+</testsuites>

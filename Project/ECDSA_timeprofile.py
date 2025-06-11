@@ -1,13 +1,14 @@
+
 import hashlib
 import secrets
 import time
 
-# ——— Domain parameters for secp256k1 ———
+# ---- Domain parameters for secp256k1 ----
 p  = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
 a  = 0
 b  = 7
 
-# Base point G (make sure these are exact)
+# Base point G
 Gx = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798
 Gy = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8
 G  = (Gx, Gy)
@@ -15,9 +16,20 @@ G  = (Gx, Gy)
 # Order of G
 n  = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
 
-# ——— Finite-field and EC point ops ———
 def inv_mod(k, m):
-    return pow(k, -1, m)
+    """
+    Extended-Euclidean modular inverse (works on Python ≥3.0).
+    """
+    k = k % m
+    if k == 0:
+        raise ZeroDivisionError("division by zero")
+    lm, low = 1, k
+    hm, high = 0, m
+    while low > 1:
+        r = high // low
+        nm, new = hm - lm * r, high - low * r
+        lm, low, hm, high = nm, new, lm, low
+    return lm % m
 
 def is_on_curve(P):
     if P is None: return True
@@ -39,7 +51,10 @@ def point_add(P, Q):
     y3 = (lam*(x1 - x3) - y1) % p
     return (x3, y3)
 
-# ——— Original scalar_mult ———
+# …rest of your code unchanged…
+
+
+#  Original scalar_mult 
 def _orig_scalar_mult(k, P):
     result = None
     addend = P
@@ -71,7 +86,7 @@ def print_point(label, P):
         x, y = P
         print(f"{label}:\n  x = {hex(x)}\n  y = {hex(y)}")
 
-# ——— Instrumented wrapper for scalar_mult ———
+# Instrumented wrapper for scalar_mult
 _scalar_mult_calls = 0
 _scalar_mult_time  = 0.0
 
@@ -96,14 +111,14 @@ def scalar_mult(k, P):
     return R
 
 
-# ——— Key generation ———
+# Key generation
 def gen_keypair():
     priv = secrets.randbelow(n-1) + 1
     pub  = scalar_mult(priv, G)
     assert is_on_curve(pub), "pub is off-curve!"
     return priv, pub
 
-# ——— ECDSA: hash, sign, verify ———
+# ECDSA: hash, sign, verify 
 def sha256_int(msg: bytes) -> int:
     return int.from_bytes(hashlib.sha256(msg).digest(), 'big') % n
 

@@ -1,0 +1,81 @@
+# do sim_build/runsim.do
+# QuestaSim-64 vmap 2021.3_1 Lib Mapping Utility 2021.08 Aug 15 2021
+# vmap -c 
+# ** Warning: vmap will not overwrite local modelsim.ini.
+# QuestaSim-64 vmap 2021.3_1 Lib Mapping Utility 2021.08 Aug 15 2021
+# vmap work sim_build/work 
+# Modifying modelsim.ini
+# QuestaSim-64 vlog 2021.3_1 Compiler 2021.08 Aug 15 2021
+# Start time: 16:59:44 on Jun 10,2025
+# vlog -work work "+define+COCOTB_SIM" -sv -timescale 1ns/1ps -mfcu "+acc" ../src/mod_add.v ../src/mod_inv.v ../src/mod_mul.v ../src/mod_sub.v ../src/point_add.v ../src/scalar_mul.v 
+# -- Compiling module mod_add
+# -- Compiling module mod_inv
+# -- Compiling module mod_mul
+# -- Compiling module mod_sub
+# -- Compiling module point_add
+# -- Compiling module scalar_mul
+# 
+# Top level modules:
+# 	scalar_mul
+# End time: 16:59:45 on Jun 10,2025, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vsim -onfinish exit -pli "/u/satyajit/.local/lib/python3.6/site-packages/cocotb/libs/libcocotbvpi_modelsim.so" work.scalar_mul 
+# Start time: 16:59:45 on Jun 10,2025
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: (vsim-3865) Due to PLI being present, global +acc is being enabled automatically. This will cause your simulation to run very slowly. Please use vsim -no_autoacc to disable this feature. This feature is now deprecated and will be removed from future releases.
+# ** Note: (vopt-143) Recognized 1 FSM in module "point_add(fast)".
+# ** Note: (vopt-143) Recognized 2 FSMs in module "scalar_mul(fast)".
+# ** Note: (vopt-143) Recognized 1 FSM in module "mod_inv(fast)".
+# //  Questa Sim-64
+# //  Version 2021.3_1 linux_x86_64 Aug 15 2021
+# //
+# //  Copyright 1991-2021 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.scalar_mul(fast)
+# Loading work.point_add(fast)
+# Loading work.mod_sub(fast)
+# Loading work.mod_add(fast)
+# Loading work.mod_mul(fast)
+# Loading work.mod_inv(fast)
+# Loading /u/satyajit/.local/lib/python3.6/site-packages/cocotb/libs/libcocotbvpi_modelsim.so
+#      -.--ns INFO     gpi                                ..mbed/gpi_embed.cpp:81   in set_program_name_in_venv        Did not detect Python virtual environment. Using system-wide Python interpreter
+#      -.--ns INFO     gpi                                ../gpi/GpiCommon.cpp:101  in gpi_print_registered_impl       VPI registered
+#      0.00ns INFO     cocotb                             Running on ModelSim for Questa-64 version 2021.3_1 2021.08
+#      0.00ns INFO     cocotb                             Running tests with cocotb v1.9.2 from /u/satyajit/.local/lib/python3.6/site-packages/cocotb
+#      0.00ns INFO     cocotb                             Seeding Python random module with 1749599987
+#      0.00ns INFO     cocotb.regression                  pytest not found, install it to enable better AssertionError messages
+#      0.00ns INFO     cocotb.regression                  Found test test_hw_sign.run_hw_scalar_mult
+#      0.00ns INFO     cocotb.regression                  running run_hw_scalar_mult (1/1)
+# 
+# **** New scalar_mult ****
+# Scalar k = 90d70257ffafda89c02682448607f29400e08af1263ac565b2f42954a2566a9d
+# Point P = (70415c859a6c9df7402f9e3d7145ecd7911cc05cfaebd297ab22b66f7bf8cb18, 2f3784dd1401d5865a61c71177706e4508f1acd3de6d66b74c0f965d976d49bf, inf=0)
+# 
+# === Final Output k*P ===
+#   x = aefb5837af25b3c7436e38d5a291abf47d18dd4b101eebe4564e4cbbbd684df1
+#   y = 4b30fdee16e83a52e0fa6a412d22b543d488360dbf7da615d0f2f7f8e29d9b06
+# RESULT_X=79146523121668471158441583431182239866620491342862263455609842055030581513713
+# RESULT_Y=34010024863559789773988048815078522100811586445976929904564435424346912955142
+# 488474835.00ns INFO     cocotb.regression                  run_hw_scalar_mult passed
+# 488474835.00ns INFO     cocotb.regression                  *****************************************************************************************
+#                                                            ** TEST                             STATUS  SIM TIME (ns)  REAL TIME (s)  RATIO (ns/s) **
+#                                                            *****************************************************************************************
+#                                                            ** test_hw_sign.run_hw_scalar_mult   PASS   488474835.00        5310.57      91981.67  **
+#                                                            *****************************************************************************************
+#                                                            ** TESTS=1 PASS=1 FAIL=0 SKIP=0             488474835.00        5310.58      91981.40  **
+#                                                            *****************************************************************************************
+#                                                            
+# ** Note: $finish    : ../src/scalar_mul.v(175)
+#    Time: 488474835001 ps  Iteration: 0  Instance: /scalar_mul
+# End time: 18:28:17 on Jun 10,2025, Elapsed time: 1:28:32
+# Errors: 0, Warnings: 1

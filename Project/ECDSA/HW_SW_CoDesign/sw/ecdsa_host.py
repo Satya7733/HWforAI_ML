@@ -18,8 +18,24 @@ G  = (Gx, Gy)
 n  = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
 
 # ——— Finite-field and EC point ops ———
+#def inv_mod(k, m):
+#    return pow(k, -1, m)
+
+
 def inv_mod(k, m):
-    return pow(k, -1, m)
+    """
+    Extended-Euclidean modular inverse (works on Python ≥3.0).
+    """
+    k = k % m
+    if k == 0:
+        raise ZeroDivisionError("division by zero")
+    lm, low = 1, k
+    hm, high = 0, m
+    while low > 1:
+        r = high // low
+        nm, new = hm - lm * r, high - low * r
+        lm, low, hm, high = nm, new, lm, low
+    return lm % m
 
 def is_on_curve(P):
     if P is None:
@@ -53,7 +69,14 @@ def hw_scalar_mult(k: int, Px: int, Py: int) -> tuple:
     # Get the absolute path to the tb/ directory
     base_dir = os.path.dirname(os.path.abspath(__file__))
     tb_dir = os.path.abspath(os.path.join(base_dir, "..", "tb"))
-    result = subprocess.run(["make", "-C", "tb", "SIM=questa"], env=env, capture_output=True, text=True)
+
+    result = subprocess.run(
+        ["make", "-C", "tb", "SIM=questa"],
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True
+    )
 
     if result.returncode != 0:
         print(result.stderr)
@@ -61,10 +84,11 @@ def hw_scalar_mult(k: int, Px: int, Py: int) -> tuple:
 
     X, Y = None, None
     for line in result.stdout.splitlines():
+        line = line.lstrip("# ").strip()
         if line.startswith("RESULT_X="):
-            X = int(line.split("=")[1])
+                X = int(line.split("=")[1])
         if line.startswith("RESULT_Y="):
-            Y = int(line.split("=")[1])
+                Y = int(line.split("=")[1])
 
     if X is None or Y is None:
         raise ValueError("Output values not found in simulation output")
@@ -84,6 +108,8 @@ def sw_scalar_mult(k, P):
     return result
 
 def scalar_mult(k, P):
+    print(f"[INFO] Entered scalar_mult with scalar k = {hex(k)}")
+    print(f"[INFO] Base Point P = ({hex(P[0])}, {hex(P[1])})")
     if USE_HW:
         x1, y1 = hw_scalar_mult(k, P[0], P[1])
         sw_x, sw_y = sw_scalar_mult(k, P)
@@ -139,3 +165,4 @@ if __name__ == "__main__":
     sig = sign(msg, priv)
     ok  = verify(msg, sig, pub)
     print("Verified on 4MB message:", ok)
+
