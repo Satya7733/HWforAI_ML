@@ -56,7 +56,7 @@ Accelerate the scalar multiplication `k·P` on the **secp256k1** elliptic curve 
 
 Python profiling reveals scalar multiplication consumes nearly **half** of the ECDSA flow's total time. This motivates implementing it as a hardware accelerator — which has now been completed, verified, and is currently being synthesized.
 
-### Challenge Summaries
+# Challenge Summaries
 
 - **Challenge 1 – Beyond CMOS Device Exploration**
 Explores the 2023 IEEE IRDS “Beyond CMOS” roadmap; surveys emerging devices such as spintronic, ferroelectric, and photonic logic/memory technologies aimed at succeeding CMOS scaling.
