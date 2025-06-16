@@ -2,14 +2,49 @@
 
 A collection of hands-on challenges blending hardware (HDL, CUDA, FPGA) and AI/ML (Python, PyTorch). Each challenge explores profiling, bottlenecks, and hardware acceleration for classic algorithms and neural models.
 
+
 ---
 # ECDSA Scalar Multiplication Hardware Accelerator
 
+---
+
+## 📂 ECDSA Scalar Multiplication Hardware Accelerator – Project Structure
+ECDSA/
+├── Documentation/ # Final project report, slides, stats summary
+├── HW_SW_CoDesign/ # Cocotb-based HW/SW co-simulation (Python + Verilog)
+├── PythonECDSA_Implementation_TimeProfiling/ # Time profiling in Python + performance plots
+├── Synthesis/ # Synthesis results using DC Synopsys
+├── rtl/ # Synthesizable Verilog + Testbench (exhaustive)
+
+
+### 📁 Folder Details
+
+- **Documentation/**  
+  Contains the complete **FINAL PROJECT REPORT**, **presentation slides**, and a summary of key project statistics and decisions.
+
+- **HW_SW_CoDesign/**  
+  Hosts the **Cocotb-based HW/SW co-simulation framework**.  
+  It includes Python testbenches driving the Verilog design, and asserts correctness across multiple test vectors.
+  **RUN the ecdsa_host.py for the whole HW-SW simulation**
+  This is where the **co-simulation** between RTL and software validation happens.
+
+- **PythonECDSA_Implementation_TimeProfiling/**  
+  Includes Python code for profiling **scalar multiplication** performance.  
+  It logs **timing stats**, generates visual summaries (matplotlib), and identifies key **bottlenecks** motivating hardware acceleration.
+
+- **Synthesis/**  
+  Contains the output files from **Design Compiler (DC Synopsys)** synthesis runs.  
+  Includes: area reports, timing summaries, synthesized netlists, and utilization metrics.
+
+- **rtl/**  
+  Includes the **synthesizable Verilog implementation** of scalar multiplication on the `secp256k1` curve.  
+  Also contains **testbenches** for exhaustive functional verification.
+
+---
 ## 🌟 Objective
 
 Accelerate the scalar multiplication `k·P` on the **secp256k1** elliptic curve — a key computational step in the **ECDSA** digital signature scheme.
 
----
 
 ## 📀 Design Overview
 
