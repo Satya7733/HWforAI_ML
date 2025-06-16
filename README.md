@@ -99,6 +99,20 @@ Identified an analog op-amp integrator circuit that inherently solves differenti
 
 - **Challenge 17 – Systolic Array Bubble Sort**  
   Implements Bubble Sort on a linear systolic array (hardware-friendly), compares with Python software version, and visualizes execution time scaling. Demonstrates O(N²) for software vs. O(N) for hardware by exploiting parallel compare-and-swap.
+  
+- **Challenge 19 – Binary LIF Neuron Verilog**  
+  Implements a **binary Leaky Integrate-and-Fire neuron** in Verilog; README explains state update, leak factor, threshold logic, and includes a self-checking testbench plus timing waveforms.
+
+- **Challenge 22 – Neuromorphic Computing at Scale Review**  
+  Reads Kudithipudi et al. *Nature* 2025; identifies sparsity and distributed hierarchy as major hurdles, proposes candidate breakthroughs for neuromorphic computing’s “AlexNet moment,” and reflects on potential application domains.
+
+- **Challenge 26 – BrainChip Akida Edge AI**  
+  Summarizes an EETimes podcast on BrainChip’s **Temporal Event-based Neural Network (TENN)** IP; compares Akida’s low-power spiking approach to GPUs and other neuromorphic chips in latency, energy, and scalability; provides a critical perspective write-up.
+
+- **Challenge 28 – Memristor Modeling & Simulation**  
+  Implements the **Biolek memristor model** in Python, generates a pinched I–V hysteresis plot, exports a Word report with proper equations, and documents how memristor conductance can enable STDP-style plasticity.
+
+
 
 ---
 
