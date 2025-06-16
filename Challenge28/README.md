@@ -103,8 +103,3 @@ This challenge helped us understand the **core dynamics of memristors** and thei
 
 ---
 
-## 📁 Files Included
-
-- `memristor.py` – Python simulation code
-- `Memristor_Simulation_Report.docx` – Word-formatted report with equations
-- `README.md` – This summary document
