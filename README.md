@@ -9,12 +9,14 @@ A collection of hands-on challenges blending hardware (HDL, CUDA, FPGA) and AI/M
 ---
 
 ## 📂 ECDSA Scalar Multiplication Hardware Accelerator – Project Structure
+```plaintext
 ECDSA/
-├── Documentation/ # Final project report, slides, stats summary
-├── HW_SW_CoDesign/ # Cocotb-based HW/SW co-simulation (Python + Verilog)
-├── PythonECDSA_Implementation_TimeProfiling/ # Time profiling in Python + performance plots
-├── Synthesis/ # Synthesis results using DC Synopsys
-├── rtl/ # Synthesizable Verilog + Testbench (exhaustive)
+├── Documentation/                             # Final report, presentation slides, project stats
+├── HW_SW_CoDesign/                            # Cocotb-based HW/SW co-simulation (Python + Verilog)
+├── PythonECDSA_Implementation_TimeProfiling/  # Time profiling Python script and performance plots
+├── Synthesis/                                 # Synthesis output from DC Synopsys (netlists, reports)
+├── rtl/                                       # Synthesizable Verilog + exhaustive testbench
+```
 
 
 ### 📁 Folder Details
