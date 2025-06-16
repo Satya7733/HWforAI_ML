@@ -8,9 +8,9 @@ A collection of hands-on challenges blending hardware (HDL, CUDA, FPGA) and AI/M
 
 ---
 
-## 📂 ECDSA Scalar Multiplication Hardware Accelerator – Project Structure
+## 📂 [ECDSA Scalar Multiplication Hardware Accelerator – Project Structure](https://github.com/Satya7733/HWforAI_ML/tree/main/Project/ECDSA)
 ```plaintext
-🔗 [Project/ECDSA/](https://github.com/Satya7733/HWforAI_ML/tree/main/Project/ECDSA)
+Project/ECDSA/
 ├── Documentation/                             # Final report, presentation slides, project stats
 ├── HW_SW_CoDesign/                            # Cocotb-based HW/SW co-simulation (Python + Verilog)
 ├── PythonECDSA_Implementation_TimeProfiling/  # Time profiling Python script and performance plots
